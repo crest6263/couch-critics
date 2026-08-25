@@ -447,7 +447,7 @@
 
           // If email confirmation is disabled, a session is returned immediately.
           if (data.session && data.user) {
-            const { error: profileError } = await supabase
+            const { error: profileError } = await sb
               .from('profiles')
               .insert({ id: data.user.id, name: nameVal });
             if (profileError && !profileError.message.toLowerCase().includes('duplicate')) {
@@ -497,7 +497,7 @@
   async function ensureProfile() {
     if (!currentUser) return null;
 
-    let { data, error } = await supabase
+    let { data, error } = await sb
       .from('profiles')
       .select('id, name')
       .eq('id', currentUser.id)
@@ -510,7 +510,7 @@
         (currentUser.user_metadata && currentUser.user_metadata.name) || 
         currentUser.email.split('@')[0];
 
-      const { data: created, error: createError } = await supabase
+      const { data: created, error: createError } = await sb
         .from('profiles')
         .insert({ id: currentUser.id, name: pendingName })
         .select('id, name')
@@ -526,14 +526,14 @@
   }
 
   async function loadMovies() {
-    const { data: movieRows, error: movieError } = await supabase
+    const { data: movieRows, error: movieError } = await sb
       .from('movies')
       .select('id, title, year, notes, added_by, added_at, watched, watched_at')
       .order('added_at', { ascending: true });
 
     if (movieError) throw movieError;
 
-    const { data: ratingRows, error: ratingError } = await supabase
+    const { data: ratingRows, error: ratingError } = await sb
       .from('ratings')
       .select('id, movie_id, user_id, rating, created_at');
 
@@ -546,7 +546,7 @@
 
     let profiles = [];
     if (userIds.length) {
-      const { data: profileRows, error: profileError } = await supabase
+      const { data: profileRows, error: profileError } = await sb
         .from('profiles')
         .select('id, name')
         .in('id', userIds);
@@ -741,7 +741,7 @@
       return;
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await sb
       .from('movies')
       .insert({
         title,
@@ -765,7 +765,7 @@
   }
 
   async function markWatched(id) {
-    const { error } = await supabase
+    const { error } = await sb
       .from('movies')
       .update({
         watched: true,
@@ -787,7 +787,7 @@
   async function removeMovie(id) {
     if (!confirm('Remove this movie from Couch Critics?')) return;
 
-    const { error } = await supabase
+    const { error } = await sb
       .from('movies')
       .delete()
       .eq('id', id);
@@ -807,7 +807,7 @@
     const existingValue = existing ? (typeof existing === 'number' ? existing : existing.value) : 0;
 
     if (existingValue === val) {
-      const { error } = await supabase
+      const { error } = await sb
         .from('ratings')
         .delete()
         .eq('movie_id', movieId)
@@ -818,7 +818,7 @@
         return;
       }
     } else {
-      const { error } = await supabase
+      const { error } = await sb
         .from('ratings')
         .upsert({
           movie_id: movieId,
