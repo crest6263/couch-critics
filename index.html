@@ -340,7 +340,7 @@
   const SUPABASE_URL = 'https://mdernhvlplgnpwrijlor.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZXJuaHZscGxnbnB3cmlqb3IiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4NzY3NTI4MiwiZXhwIjoyMTAzMjUxMjgyfQ.wwknEKQcl3iPW1OXMjhn2GLsbmqaUTqQManwKvggxYQ';
 
-  const supabase = window.supabase.createClient(
+  const sb = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
   );
@@ -439,7 +439,7 @@
 
       try {
         if (isSignup) {
-          const { data, error } = await supabase.auth.signUp({
+          const { data, error } = await sb.auth.signUp({
             email: emailVal,
             password: passwordVal
           });
@@ -466,7 +466,7 @@
             document.getElementById('wl-back-login').onclick = () => renderGate('login');
           }
         } else {
-          const { error } = await supabase.auth.signInWithPassword({
+          const { error } = await sb.auth.signInWithPassword({
             email: emailVal,
             password: passwordVal
           });
@@ -585,7 +585,7 @@
     footer.style.display = 'block';
 
     document.getElementById('wl-logout').onclick = async () => {
-      await supabase.auth.signOut();
+      await sb.auth.signOut();
       currentUser = null;
       profile = null;
       movies = [];
@@ -837,7 +837,8 @@
   }
 
   async function init() {
-    const { data, error } = await supabase.auth.getUser();
+    if (!sb) throw new Error('Supabase client failed to initialize.');
+    const { data, error } = await sb.auth.getUser();
 
     if (error || !data.user) {
       currentUser = null;
@@ -860,7 +861,7 @@
     }
   }
 
-  supabase.auth.onAuthStateChange((event, session) => {
+  sb.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
       currentUser = null;
       profile = null;
